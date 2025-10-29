@@ -1,0 +1,80 @@
+// Prisma schema for core tables
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Idempotency {
+  key         String   @id
+  createdAt   DateTime @default(now())
+  lastResultId String?
+}
+
+model AuditLog {
+  id          Int      @id @default(autoincrement())
+  ts          DateTime @default(now())
+  flow        String
+  objectType  String
+  action      String
+  externalId  String?
+  fingerprint String?
+  payloadHash String?
+  httpStatus  Int?
+  resultId    String?
+  durationMs  Int?
+}
+
+model DLQ {
+  id           Int      @id @default(autoincrement())
+  ts           DateTime @default(now())
+  sourceSystem String
+  targetSystem String
+  objectType   String
+  externalId   String?
+  errorCode    String?
+  errorMessage String?
+  payloadJson  String
+  retryCount   Int      @default(0)
+  replayStatus String   @default("PENDING")
+}
+
+model Cursor {
+  name      String @id
+  value     String?
+  updatedAt DateTime @default(now())
+}
+
+model Mapping {
+  id            String @id
+  chargeType    String
+  qboAccountId  String?
+  qboItemId     String?
+  classId       String?
+  locationId    String?
+  taxCode       String?
+  memoTemplate  String?
+  active        Boolean @default(true)
+}
+
+model Property {
+  propertyId    String @id
+  classId       String?
+  locationId    String?
+  bankAccountId String?
+  active        Boolean @default(true)
+}
+
+model OAuthToken {
+  id           Int      @id @default(autoincrement())
+  provider     String
+  accessToken  String
+  refreshToken String
+  expiresAt    DateTime
+  realmId      String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
